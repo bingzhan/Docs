@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>layout</title>
+    <style media="screen">
+    html,body{ margin: 0;padding: : 0;}
+        .wrap{ width: 980px;margin: 0 auto;}
+        .header{ background-color: red;height: 30px;}
+        .main{ display: flex;}
+        .left{ flex: 25;position: relative;}
+        .center{ height: 2000px;flex: 50;background-color: bisque;}
+        .right{ flex: 25;}
+        .leftContent,.rightContent{background-color: aqua;border: 1px solid #000;}
+        .leftContent{ height: 1200px;overflow: hidden;}
+        .rightContent{ height: 1000px;overflow: hidden;}
+        .footer{ background-color: green;height: 60px;}
+    </style>
+    <script src="http://127.0.0.1/library/jquery-2.1.4.min.js" charset="utf-8"></script>
+</head>
+<body>
+    <div class="wrap">
+        <div class="header"></div>
+        <div class="main">
+            <div class="left"><div class="leftContent"></div></div>
+            <div class="center"></div>
+            <div class="right"><div class="rightContent"></div></div>
+        </div>
+        <div class="footer"></div>
+    </div>
+<script type="text/javascript">
+var left = document.querySelector('.left');
+var leftContent = document.querySelector('.leftContent');
+var status = 0;
+var beforeScrollY = document.body.scrollTop;
+$(window).scroll(function(){
+    const SY = window.scrollY;
+    const LCH = $(leftContent).offset().top + leftContent.offsetHeight - window.innerHeight;
+    const LH = left.offsetTop + left.offsetHeight - window.innerHeight;
+    const LCT = $(leftContent).offset().top;
+    console.log(status, SY, LCT, LCH);
+    if (status == 3 || status == 1){
+    // if (status == 3 && SY > LCT || status == 1 && SY < LCH){
+        $(leftContent).attr('style', 'position: absolute;width: 243px;top: '+($(leftContent).offset().top-left.offsetTop)+'px;');
+        status = beforeScrollY < SY ? 0 : 2;
+    }
+    if (status == 0 && SY >= LCH){
+        status = 1;
+        $(leftContent).attr('style', 'position: fixed;width: 243px;bottom: 0;');
+    }
+    if (status == 1 && SY >= LH){
+        status = 2;
+        $(leftContent).attr('style', 'position: absolute;width: 243px;bottom: 0;');
+    }
+    if (status == 2 && SY <= LCT){
+        status = 3;
+        $(leftContent).attr('style', 'position: fixed;width: 243px;top: 0;');
+    }
+    if (status == 3 && SY <= left.offsetTop){
+        status = 0;
+        $(leftContent).removeAttr('style');
+    }
+    beforeScrollY = SY;
+});
+var i = 0, str = '';
+while (i < 500) {
+    str = str + ', ' + i;
+    i++;
+}
+leftContent.innerText = str;
+</script>
+</body>
+</html>
