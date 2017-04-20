@@ -6,21 +6,22 @@
     <style media="screen">
     html,body{ margin: 0;padding: : 0;}
         .wrap{ width: 980px;margin: 0 auto;}
-        .header{ background-color: red;height: 30px;}
+        .header{ height: 30px;position: relative;}
+        .headerContent{ width: 100%;background-color: red;height: 30px;position: fixed;top: 0;left: 0;z-index: 12;}
         .main{ display: flex;}
         .left{ flex: 25;position: relative;}
-        .center{ height: 2000px;flex: 50;background-color: bisque;}
+        .center{ height: 1200px;flex: 50;background-color: bisque;}
         .right{ flex: 25;}
         .leftContent,.rightContent{background-color: aqua;border: 1px solid #000;}
-        .leftContent{ height: 1200px;overflow: hidden;}
+        .leftContent{ height: 300px;overflow: hidden;}
         .rightContent{ height: 1000px;overflow: hidden;}
-        .footer{ background-color: green;height: 60px;}
+        .footer{ background-color: green;height: 260px;}
     </style>
     <script src="http://127.0.0.1/library/jquery-2.1.4.min.js" charset="utf-8"></script>
 </head>
 <body>
     <div class="wrap">
-        <div class="header"></div>
+        <div class="header"><div class="headerContent"></div></div>
         <div class="main">
             <div class="left"><div class="leftContent"></div></div>
             <div class="center"></div>
@@ -29,34 +30,52 @@
         <div class="footer"></div>
     </div>
 <script type="text/javascript">
+var str = '';
+// var a = str.replace(/\s(?!src)[a-zA-Z]+=[\'\"]{1}[^\'\"]+[\'\"]{1}/iug, ''); // 过滤除了src之外的所有属性
+var b = str.replace(/\s(?!(src|alt))[a-zA-Z]+=[^\s]*/iug, ''); // 过滤设置过滤除了alt和src之外的所有属性
+var c = str.replace(/<(\/)?[^>]*>/ig, ''); // 过滤所有html标签的属性
+var d = str.replace(/(\s)alt=[^\s]*/ig, ''); // 只过滤alt属性
+
+var oo = str.replace(/<(\/)?[^>]*>/ig, '');
+console.log(oo);
+</script>
+<script type="text/javascript">
 var left = document.querySelector('.left');
 var leftContent = document.querySelector('.leftContent');
+var mainContent = document.querySelector('.center');
 var status = 0;
 var beforeScrollY = document.body.scrollTop;
 $(window).scroll(function(){
+    if (leftContent.offsetHeight >= mainContent.offsetHeight) return false;
     const SY = window.scrollY;
     const LCH = $(leftContent).offset().top + leftContent.offsetHeight - window.innerHeight;
     const LH = left.offsetTop + left.offsetHeight - window.innerHeight;
-    const LCT = $(leftContent).offset().top;
-    console.log(status, SY, LCT, LCH);
-    if (status == 3 || status == 1){
-    // if (status == 3 && SY > LCT || status == 1 && SY < LCH){
+    const LCT = $(leftContent).offset().top - left.offsetTop;
+    const scrollDown = beforeScrollY < SY;
+    // console.log(status, SY, LH, LCT, LCH);
+    if (status == 3 && scrollDown && SY >= LCT || status == 1 && !scrollDown && SY <= LCH){
         $(leftContent).attr('style', 'position: absolute;width: 243px;top: '+($(leftContent).offset().top-left.offsetTop)+'px;');
-        status = beforeScrollY < SY ? 0 : 2;
+        status = scrollDown ? 0 : 2;
     }
-    if (status == 0 && SY >= LCH){
-        status = 1;
-        $(leftContent).attr('style', 'position: fixed;width: 243px;bottom: 0;');
+    if (status == 0 || status == 2){
+        if (scrollDown && SY >= LCH){
+            status = 1;
+            left.offsetTop + leftContent.offsetHeight > window.innerHeight ?
+                $(leftContent).attr('style', 'position: fixed;width: 243px;bottom: 0;') :
+                $(leftContent).attr('style', 'position: fixed;width: 243px;top: '+left.offsetTop+'px;');
+        }
+        if (!scrollDown && SY <= LCT){
+            status = 3;
+            $(leftContent).attr('style', 'position: fixed;width: 243px;top: '+left.offsetTop+'px;');
+        }
     }
-    if (status == 1 && SY >= LH){
+    var Lcon = left.offsetTop+leftContent.offsetHeight;
+    if (status == 1 && (Lcon > window.innerHeight ? SY >= LH :
+            SY >= LH+window.innerHeight-Lcon)){
         status = 2;
-        $(leftContent).attr('style', 'position: absolute;width: 243px;bottom: 0;');
+        LCH > 0 && $(leftContent).attr('style', 'position: absolute;width: 243px;bottom: 0;');
     }
-    if (status == 2 && SY <= LCT){
-        status = 3;
-        $(leftContent).attr('style', 'position: fixed;width: 243px;top: 0;');
-    }
-    if (status == 3 && SY <= left.offsetTop){
+    if (status == 3 && SY <= 0){
         status = 0;
         $(leftContent).removeAttr('style');
     }
