@@ -51,6 +51,7 @@ $(window).scroll(function(){
     const LCH = $(leftContent).offset().top + leftContent.offsetHeight - window.innerHeight;
     const LH = left.offsetTop + left.offsetHeight - window.innerHeight;
     const LCT = $(leftContent).offset().top - left.offsetTop;
+    const LIH = left.offsetTop + leftContent.offsetHeight - window.innerHeight;
     const scrollDown = beforeScrollY < SY;
     // console.log(status, SY, LH, LCT, LCH);
     if (status == 3 && scrollDown && SY >= LCT || status == 1 && !scrollDown && SY <= LCH){
@@ -60,8 +61,7 @@ $(window).scroll(function(){
     if (status == 0 || status == 2){
         if (scrollDown && SY >= LCH){
             status = 1;
-            left.offsetTop + leftContent.offsetHeight > window.innerHeight ?
-                $(leftContent).attr('style', 'position: fixed;width: 243px;bottom: 0;') :
+            LIH > 0 ? $(leftContent).attr('style', 'position: fixed;width: 243px;bottom: 0;') :
                 $(leftContent).attr('style', 'position: fixed;width: 243px;top: '+left.offsetTop+'px;');
         }
         if (!scrollDown && SY <= LCT){
@@ -69,9 +69,7 @@ $(window).scroll(function(){
             $(leftContent).attr('style', 'position: fixed;width: 243px;top: '+left.offsetTop+'px;');
         }
     }
-    var Lcon = left.offsetTop+leftContent.offsetHeight;
-    if (status == 1 && (Lcon > window.innerHeight ? SY >= LH :
-            SY >= LH+window.innerHeight-Lcon)){
+    if (status == 1 && (LIH > 0 ? SY >= LH : SY >= LH-LIH)){
         status = 2;
         LCH > 0 && $(leftContent).attr('style', 'position: absolute;width: 243px;bottom: 0;');
     }
